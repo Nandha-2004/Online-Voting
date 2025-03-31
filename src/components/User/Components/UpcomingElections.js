@@ -1,97 +1,94 @@
-import { useEffect, React, useRef} from 'react';
+import { useEffect, React, useRef, useState } from 'react';
 import ScrollReveal from "scrollreveal";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-import "../CSS/upcomingElections.css"
-const UpcomingElections = ({voteStatus})=>{
+import "../CSS/upcomingElections.css";
+import { BASE_URL } from '../../../helper';
+
+const UpcomingElections = () => {
     const navigate = useNavigate();
-   
-    // const handleButtonClick = () => {
-    //     if (voteStatus) {
-    //         alert("You Have Already Voted");
-    //     } else {
-    //         navigate('/Vote')
-    //     }
-    //   };
-    
+    const [upcomingElections, setUpcomingElections] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const revealRefBottom = useRef(null);
     const revealRefLeft = useRef(null);  
     const revealRefTop = useRef(null);
     const revealRefRight = useRef(null);
-  
-    useEffect(() => {
-    
-      // Initialize ScrollReveal
-      ScrollReveal().reveal(revealRefBottom.current, {
-        // You can configure options here
-        duration: 1000,
-        delay: 200,
-        distance: '50px',
-        origin: 'bottom',
-        easing: 'ease',
-        reset: 'true',
-      });
-    }, []);
-    useEffect(() => {
-    
-      // Initialize ScrollReveal
-      ScrollReveal().reveal(revealRefRight.current, {
-        // You can configure options here
-        duration: 1000,
-        delay: 200,
-        distance: '50px',
-        origin: 'right',
-        easing: 'ease',
-        reset: 'true',
-      });
-    }, []);  useEffect(() => {
-    
-      // Initialize ScrollReveal
-      ScrollReveal().reveal(revealRefLeft.current, {
-        // You can configure options here
-        duration: 1000,
-        delay: 200,
-        distance: '50px',
-        origin: 'left',
-        easing: 'ease',
-        reset: 'true',
-      });
-    }, []);  useEffect(() => {
-    
-      // Initialize ScrollReveal
-      ScrollReveal().reveal(revealRefTop.current, {
-        // You can configure options here
-        duration: 1000,
-        delay: 200,
-        distance: '50px',
-        origin: 'top',
-        easing: 'ease',
-        reset: 'true',
-      });
-    }, []); 
-    return(
-        <div className="upcomingElections">
-            <h2 ref={revealRefTop}>Upcoming Elections</h2>
- 
-            <div className="upcomingElectionsCardContainer">
-                <div className="upcomingElectionCard" ref={revealRefLeft}>
-                    <h3>2024 India General Election</h3><br/>
-                    <p>General elections will be held in India from 19 April 2024 to 1 June 2024 to elect the 543 members of the 18th Lok Sabha. The elections will be held in seven phases and the results will be announced on 4 June 2024.</p><br/>
-                    <button><a href='/Vote'>Participate/Vote</a></button>
-                </div>
-                <div className="upcomingElectionCard" ref={revealRefBottom}>
-                    <h3>2024 India General Election</h3><br/>
-                    <p>General elections will be held in India from 19 April 2024 to 1 June 2024 to elect the 543 members of the 18th Lok Sabha. The elections will be held in seven phases and the results will be announced on 4 June 2024.</p><br/>
-                    <button><a href='/Vote'>Participate/Vote</a></button>
-                </div>
-                <div className="upcomingElectionCard" ref={revealRefRight}>
-                    <h3>2024 India General Election</h3><br/>
-                    <p>General elections will be held in India from 19 April 2024 to 1 June 2024 to elect the 543 members of the 18th Lok Sabha. The elections will be held in seven phases and the results will be announced on 4 June 2024.</p><br/>
-                    <button><a href='/Vote'>Participate/Vote</a></button>
-                </div>
 
+    useEffect(() => {
+        axios.get(`${BASE_URL}/admin/getElections`)
+            .then((response) => {
+                console.log("Elections Data:", response.data);
+                // Filter only the elections that are "started"
+                const startedElections = response.data.filter(election => election.status === "started");
+                setUpcomingElections(startedElections);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Error fetching elections: ", err);
+                setError(err);
+                setLoading(false);
+            });
+
+        // Initialize ScrollReveal for animations
+        ScrollReveal().reveal(revealRefBottom.current, {
+            duration: 1000,
+            delay: 200,
+            distance: '50px',
+            origin: 'bottom',
+            easing: 'ease',
+            reset: true,
+        });
+
+        ScrollReveal().reveal(revealRefRight.current, {
+            duration: 1000,
+            delay: 200,
+            distance: '50px',
+            origin: 'right',
+            easing: 'ease',
+            reset: true,
+        });
+
+        ScrollReveal().reveal(revealRefLeft.current, {
+            duration: 1000,
+            delay: 200,
+            distance: '50px',
+            origin: 'left',
+            easing: 'ease',
+            reset: true,
+        });
+
+        ScrollReveal().reveal(revealRefTop.current, {
+            duration: 1000,
+            delay: 200,
+            distance: '50px',
+            origin: 'top',
+            easing: 'ease',
+            reset: true,
+        });
+    }, []);
+
+    if (loading) return <p>Loading elections...</p>;
+    if (error) return <p>Error fetching elections: {error.message}</p>;
+    if (upcomingElections.length === 0) return <p>No ongoing elections.</p>;
+
+    return (
+        <div className="upcomingElections">
+            <h2 ref={revealRefTop}>Ongoing Elections</h2>
+            <div className="upcomingElectionsCardContainer">
+                {upcomingElections.map((election, index) => (
+                    <div key={election._id} className="upcomingElectionCard" 
+                        ref={index % 2 === 0 ? revealRefLeft : revealRefRight}>
+                        <h3>{election.name}</h3><br/>
+                        <p>{election.desc}</p><br/>
+                        <button><a href='/Vote'>Participate/Vote</a></button>
+                    </div>
+                ))}
             </div>
         </div>
-    )
-}
+    );
+};
+
 export default UpcomingElections;

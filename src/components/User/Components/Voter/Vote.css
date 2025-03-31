@@ -9,6 +9,7 @@
 .candidate{
     margin: 0rem 1rem;
     padding: 3rem;
+    height: 100vh;
 
 }
 .candidate h2{
@@ -59,8 +60,8 @@
     transform: translateY(-100%);
 }
 .Name-Row img{
-    width: 100%;
-    height: 100%;
+    width: 20rem;
+    height: 6rem;
 }
 .User-Card1{
     width: 25%;
@@ -106,7 +107,7 @@
 }
 .Symbol img{
     /* border: 1px solid red; */
-    width: 25%;
-    height: 20%;
+    width: 6rem;
+    height: 5rem;
 }
 

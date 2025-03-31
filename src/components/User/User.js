@@ -1,119 +1,103 @@
-import { useState, useEffect, React, useRef} from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import UserNavbar from "../Navbar/UserNavbar";
-import './CSS/user.css'
-import UserCard from './Components/UserCard/userCard'
+import './CSS/user.css';
+import UserCard from './Components/UserCard/userCard';
 import UpcomingElections from './Components/UpcomingElections';
 import ScrollReveal from "scrollreveal";
 import { BASE_URL } from '../../helper';
 import Cookies from 'js-cookie';
+import 'font-awesome/css/font-awesome.css'; // Use non-minified version
 
-const User = () =>{
+const User = () => {
   const location = useLocation();
-  const { voterst } = location.state || {};
-  // console.log(voterst);
-  const setCookie = () => {
-    Cookies.set('myCookie', voterst.id, { expires: 7 }); // Set cookie for 7 days
-  };
+  const { voterst } = location.state || {}; // Safe extraction
 
-  // const getCookie = () => {
-  //   const value = Cookies.get('myCookie');
-  // };
-  if(!Cookies.get('myCookie')){
-    setCookie();
-  }
-  const voterid = Cookies.get('myCookie');
+  // Function to set a cookie safely
+  useEffect(() => {
+    if (voterst?.id && !Cookies.get('myCookie')) {
+      Cookies.set('myCookie', voterst.id, { expires: 7 });
+    }
+  }, [voterst]);
+
+  // Get voter ID safely
+  const voterid = Cookies.get('myCookie') || null; // Null instead of empty string
+
+  // Scroll Reveal Refs
   const revealRefBottom = useRef(null);
-  const revealRefLeft = useRef(null);  
+  const revealRefLeft = useRef(null);
   const revealRefTop = useRef(null);
   const revealRefRight = useRef(null);
 
   useEffect(() => {
-  
-    // Initialize ScrollReveal
-    ScrollReveal().reveal(revealRefBottom.current, {
-      // You can configure options here
+    const scrollConfig = {
       duration: 1000,
       delay: 200,
       distance: '50px',
-      origin: 'bottom',
       easing: 'ease',
-      reset: 'true',
-    });
-  }, []);
-  useEffect(() => {
-  
-    // Initialize ScrollReveal
-    ScrollReveal().reveal(revealRefRight.current, {
-      // You can configure options here
-      duration: 1000,
-      delay: 200,
-      distance: '50px',
-      origin: 'right',
-      easing: 'ease',
-      reset: 'true',
-    });
-  }, []);  useEffect(() => {
-  
-    // Initialize ScrollReveal
-    ScrollReveal().reveal(revealRefLeft.current, {
-      // You can configure options here
-      duration: 1000,
-      delay: 200,
-      distance: '50px',
-      origin: 'left',
-      easing: 'ease',
-      reset: 'true',
-    });
-  }, []);  useEffect(() => {
-  
-    // Initialize ScrollReveal
-    ScrollReveal().reveal(revealRefTop.current, {
-      // You can configure options here
-      duration: 1000,
-      delay: 200,
-      distance: '50px',
-      origin: 'top',
-      easing: 'ease',
-      reset: 'true',
-    });
-  }, []);  
-  const [singleVoter, setVoter] = useState([]);
+      reset: true,
+    };
 
-    useEffect(() => {
-      // const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
-      // console.log(token);'
-      // console.log(voter)
-        axios.get(`${BASE_URL}/getVoterbyID/${voterid}`)
-          .then((response) => {
-            console.log(response.data)
-            setVoter(response.data.voter);
-          })
-          .catch(error => {
-            console.error('Error fetching user data:', error);
-          });
-    }, []); 
-  
-    return(
-        <div className="User">
-            <UserNavbar/>
-            <div className="Heading2" ref={revealRefTop}>
-            <h3>Welcome <span>{singleVoter.firstName}</span></h3>
-            </div>
-            <div className="userPage" >
-                <div className="userDetails" ref={revealRefLeft}>
-                    <UserCard voter = {singleVoter}/>
-                    {/* <UserUtil voterid = {voterst.id} /> */}
-                </div>
-                <div className='details' ref={revealRefRight}>
-                    <h2> Welcome to <span>Online Voting Platform</span></h2>
-                    <h6>Exercise Your Right to Vote Anytime, Anywhere</h6>
-                    <p>Welcome to our online voting platform, where your voice matters. With the convenience of modern technology, we bring democracy to your fingertips, enabling you to participate in important decisions and elections from the comfort of your own home. Our secure and user-friendly platform ensures that your vote is counted accurately and confidentially. Whether it's electing your local representatives, deciding on community initiatives, or participating in organizational polls, our platform empowers you to make a difference.</p>
-                </div>
-            </div>
-            <UpcomingElections voteStatus = {singleVoter.voteStatus}/>
+    const sr = ScrollReveal();
+    sr.reveal(revealRefBottom.current, { ...scrollConfig, origin: 'bottom' });
+    sr.reveal(revealRefRight.current, { ...scrollConfig, origin: 'right' });
+    sr.reveal(revealRefLeft.current, { ...scrollConfig, origin: 'left' });
+    sr.reveal(revealRefTop.current, { ...scrollConfig, origin: 'top' });
+
+    return () => sr.destroy(); // Cleanup to prevent memory leaks
+  }, []);
+
+  const [singleVoter, setVoter] = useState({}); // Use object instead of array
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+        try {
+            const voterid = localStorage.getItem("voterid"); // Get voter ID from localStorage
+            if (!voterid) {
+                console.error("No voter ID found");
+                return;
+            }
+
+            const response = await axios.get(`${BASE_URL}/voter/getVoterbyID/${voterid}`, {
+                withCredentials: true // ✅ Send HTTP-only cookie with request
+            });
+
+            if (response.data.success) {
+              setVoter(response.data.voter);
+            } else {
+                console.error("Failed to fetch user data");
+            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+    };
+
+    fetchUserData();
+}, []);
+
+
+  return (
+    <div className="User">
+      <UserNavbar />
+      <div className="Heading2" ref={revealRefTop}>
+        <h3>Welcome <span>{singleVoter?.firstName || 'User'}</span></h3>
+      </div>
+      <div className="userPage">
+        <div className="userDetails" ref={revealRefLeft}>
+          <UserCard voter={singleVoter} />
         </div>
-    )
+        <div className='details' ref={revealRefRight}>
+          <h2>Welcome to <span>Online Voting Platform</span></h2>
+          <h6>Exercise Your Right to Vote Anytime, Anywhere</h6>
+          <p>
+            Welcome to our online voting platform, where your voice matters...
+          </p>
+        </div>
+      </div>
+      <UpcomingElections voteStatus={singleVoter?.voteStatus || "Not Voted"} />
+    </div>
+  );  
 }
+
 export default User;

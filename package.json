@@ -1,8 +1,8 @@
 {
-  "name": "myapp",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
+   "name": "myapp",
+   "version": "0.1.0",
+   "private": true,
+    "dependencies": {
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
@@ -35,8 +35,10 @@
     "dotenv": "^16.4.5",
     "emailjs": "^4.0.3",
     "emailjs-com": "^3.2.0",
+    "font-awesome": "^4.7.0",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
     "material-ui": "^1.0.0-beta.46",
     "material-ui-icons": "^1.0.0-beta.36",
     "mdb-react-ui-kit": "^7.2.0",
@@ -72,7 +74,8 @@
     "tableau-api": "^2.2.3",
     "tableau-react": "^2.2.0",
     "web-vitals": "^2.1.4",
-    "yup": "^1.4.0"
+    "yup": "^1.4.0",
+    "start": "HOST=localhost react-scripts start"    
   },
   "scripts": {
     "start": "react-scripts start",
@@ -98,7 +101,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://onlineserver-4uuo.onrender.com/",
+  "proxy": "http://localhost:5000",
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
